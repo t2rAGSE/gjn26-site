@@ -1,0 +1,15 @@
+/* GJN26 — Engravers Old English BT
+   À placer dans /assets/fonts/ du site et importer ce CSS avant les autres styles */
+@font-face {
+  font-family: 'Engravers Old English';
+  src: url('engravers-old-english.woff2') format('woff2'),
+       url('engravers-old-english.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Usage recommandé : titres et emblèmes uniquement (police très ornée, à réserver aux gros titres) */
+.gjn-titre {
+  font-family: 'Engravers Old English', 'Pirata One', serif;
+}
