@@ -18,15 +18,22 @@ const FORM_CONFIG = {
     }
   },
 
-  dimanche: {
-    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSeDKyqpUlZlOCYuVEKvlREH41oJqS0YVGxHxvJYaX4bm6twmQ/formResponse',
+  dimanche_balises: {
+    actionUrl: 'REMPLACER_PAR_URL_formResponse',
     entryIds: {
-      CléPatrouille: 'entry.1803180350',
-      BalisesPhase1: 'entry.442462766',
-      BalisesPhase2: 'entry.1300430614',
-      PrecisionCroquis: 'entry.1957162971',
-      CleTemplier: 'entry.524359351',
-      Vigenere: 'entry.2050306571',
+      CléPatrouille: 'REMPLACER_entry.XXXXXXX',
+      BalisesPhase1: 'REMPLACER_entry.XXXXXXX',
+      BalisesPhase2: 'REMPLACER_entry.XXXXXXX',
+      PrecisionCroquis: 'REMPLACER_entry.XXXXXXX',
+    }
+  },
+
+  dimanche_dechiffrage: {
+    actionUrl: 'REMPLACER_PAR_URL_formResponse',
+    entryIds: {
+      CléPatrouille: 'REMPLACER_entry.XXXXXXX',
+      CleTemplier: 'REMPLACER_entry.XXXXXXX',
+      Vigenere: 'REMPLACER_entry.XXXXXXX',
     }
   },
 
