@@ -204,7 +204,7 @@ main{ max-width:560px; margin:0 auto; padding:18px 16px 60px; }
   </div>
 
   <div class="demo-notice" id="demo-notice" style="display:none;">
-    ⚠️ API non configurée (voir <code>API_URL</code> en fin de fichier) — données de démonstration affichées.
+    ⚠️ Classement pas encore publié (<code>data/classement.json</code> introuvable) — données de démonstration affichées.
   </div>
 
   <div class="maj-info" id="maj-info"><span class="point"></span>Mise à jour…</div>
@@ -214,8 +214,9 @@ main{ max-width:560px; margin:0 auto; padding:18px 16px 60px; }
 </main>
 
 <script>
-// À COMPLETER : URL du Web App Apps Script (webapp.gs), déployée avec accès public.
-const API_URL = 'https://script.google.com/a/macros/scouts-europe.org/s/AKfycbzxJgfzMqFbCw3FW0Nt04hlSol3Ctr9Ab3KnmZRsif0JP9HWd3gUvOsxv5mM4tPikuz5g/exec';
+// Le classement est lu depuis data/classement.json (fichier statique poussé automatiquement
+// par Apps Script) — plus d'appel direct à Google (contournement de la restriction Workspace
+// scouts-europe.org qui bloque les accès anonymes aux Web Apps).
 
 const COULEUR_CAMP = { "Capétien": "var(--bleu-capetien)", "Plantagenêt": "var(--rouge-plantagenet)" };
 const MEDAILLES = ['🥇','🥈','🥉'];
@@ -239,23 +240,22 @@ async function charger() {
   const majInfo = document.getElementById('maj-info');
   const demoNotice = document.getElementById('demo-notice');
 
-  if (!API_URL || API_URL.indexOf('REMPLACER') !== -1) {
+  try {
+    // Fichier statique poussé automatiquement par Apps Script à chaque synchro
+    // (contournement de la restriction Workspace qui bloque les Web Apps publics — voir data/classement.json)
+    const res = await fetch('data/classement.json?t=' + Date.now()); // cache-busting : toujours la dernière version
+    if (!res.ok) throw new Error('Fichier data/classement.json introuvable (pas encore publié ?)');
+    const data = await res.json();
+
+    demoNotice.style.display = 'none';
+    const liste = vueActuelle.type === 'general' ? data.classement : (data.flots ? data.flots[vueActuelle.pa] : []);
+    const maj = data.derniereMaj ? new Date(data.derniereMaj).toLocaleTimeString('fr-FR') : new Date().toLocaleTimeString('fr-FR');
+    majInfo.innerHTML = '<span class="point"></span>Mis à jour ' + maj;
+    afficher(liste || [], vueActuelle.type === 'pa');
+  } catch (err) {
     demoNotice.style.display = 'block';
     majInfo.innerHTML = '<span class="point"></span>Données de démonstration';
     afficher(vueActuelle.type === 'general' ? DEMO_CLASSEMENT : DEMO_FLOTS[vueActuelle.pa], vueActuelle.type === 'pa');
-    return;
-  }
-
-  demoNotice.style.display = 'none';
-  try {
-    const action = vueActuelle.type === 'general' ? 'getClassement' : 'getFlots';
-    const res = await fetch(API_URL + '?action=' + action);
-    const data = await res.json();
-    const liste = vueActuelle.type === 'general' ? data.classement : (data.flots ? data.flots[vueActuelle.pa] : []);
-    majInfo.innerHTML = '<span class="point"></span>Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
-    afficher(liste || [], vueActuelle.type === 'pa');
-  } catch (err) {
-    majInfo.textContent = 'Impossible de charger le classement — nouvelle tentative sous peu.';
     console.error(err);
   }
 }
