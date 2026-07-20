@@ -120,6 +120,10 @@ main{
   color:var(--encre-douce);
   margin-bottom:6px;
 }
+.temps-mm-ss{ display:flex; align-items:center; gap:8px; }
+.temps-mm-ss input[type=number]{ flex:1; text-align:center; }
+.temps-mm-ss span{ font-size:.82rem; color:var(--encre-douce); font-weight:600; }
+
 .etape input[type=number]{
   width:100%;
   padding:14px 16px;
@@ -437,10 +441,27 @@ main{
     </select>
   </div>
 
-  <div class="etape">
+  <div class="etape" id="etape-note">
     <label for="note-atelier">6 · Note (sur 10)</label>
     <input type="number" id="note-atelier" min="0" max="10" step="1" placeholder="0 – 10">
     <div class="aide">0 = non réalisé / très insuffisant, 10 = parfaitement réussi</div>
+  </div>
+
+  <div class="etape" id="etape-chevalier" style="display:none">
+    <label>6 · Temps réalisé</label>
+    <div class="temps-mm-ss">
+      <input type="number" id="chevalier-min" min="0" max="59" step="1" placeholder="min">
+      <span>min</span>
+      <input type="number" id="chevalier-sec" min="0" max="59" step="1" placeholder="sec">
+      <span>sec</span>
+    </div>
+    <div class="aide">La note se calcule automatiquement par rapport aux autres temps déjà enregistrés (le meilleur temps du camp = 10).</div>
+  </div>
+
+  <div class="etape" id="etape-arbalete" style="display:none">
+    <label for="arbalete-score">6 · Score cumulé</label>
+    <input type="number" id="arbalete-score" min="0" step="1" placeholder="Score total">
+    <div class="aide">La note se calcule automatiquement par rapport aux autres scores déjà enregistrés (le meilleur score du camp = 10).</div>
   </div>
 </main>
 
@@ -594,16 +615,52 @@ function afficherSceau(p){
 }
 function resetSceau(){ sceau.classList.remove('visible'); }
 
+const etapeNote = document.getElementById('etape-note');
+const etapeChevalier = document.getElementById('etape-chevalier');
+const etapeArbalete = document.getElementById('etape-arbalete');
+const chevalierMin = document.getElementById('chevalier-min');
+const chevalierSec = document.getElementById('chevalier-sec');
+const arbaleteScore = document.getElementById('arbalete-score');
+
 noteAtelier.addEventListener('input', () => {
   const v = noteAtelier.value;
   resultat = (v === '' || Number(v) < 0 || Number(v) > 10) ? null : Number(v);
   majBouton();
 });
 
+function majTempsChevalier(){
+  const min = chevalierMin.value === '' ? null : Number(chevalierMin.value);
+  const sec = chevalierSec.value === '' ? null : Number(chevalierSec.value);
+  if (min === null && sec === null) { resultat = null; }
+  else { resultat = (min || 0) * 60 + (sec || 0); }
+  majBouton();
+}
+chevalierMin.addEventListener('input', majTempsChevalier);
+chevalierSec.addEventListener('input', majTempsChevalier);
+
+arbaleteScore.addEventListener('input', () => {
+  const v = arbaleteScore.value;
+  resultat = (v === '' || Number(v) < 0) ? null : Number(v);
+  majBouton();
+});
+
+function majAffichageAtelier(){
+  const num = Number(selAtelier.value);
+  etapeNote.style.display = 'none';
+  etapeChevalier.style.display = 'none';
+  etapeArbalete.style.display = 'none';
+  resultat = null;
+  noteAtelier.value = ''; chevalierMin.value = ''; chevalierSec.value = ''; arbaleteScore.value = '';
+  if (num === 22) etapeChevalier.style.display = '';
+  else if (num === 2) etapeArbalete.style.display = '';
+  else etapeNote.style.display = '';
+  majBouton();
+}
+
 function majBouton(){
   btnSubmit.disabled = !(cleSelectionnee !== null && selAtelier.value !== '' && resultat !== null);
 }
-selAtelier.addEventListener('change', majBouton);
+selAtelier.addEventListener('change', majAffichageAtelier);
 
 btnSubmit.addEventListener('click', async () => {
   btnSubmit.disabled = true;
@@ -625,8 +682,7 @@ btnSubmit.addEventListener('click', async () => {
     confirmation.classList.remove('visible');
     selPatrouille.value = ''; resetSceau(); cleSelectionnee = null;
     selAtelier.value = '';
-    resultat = null; noteAtelier.value = '';
-    majBouton();
+    majAffichageAtelier();
   }, 2000);
 });
 </script>
