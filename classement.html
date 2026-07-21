@@ -193,7 +193,9 @@ main{ max-width:560px; margin:0 auto; padding:18px 16px 60px; }
 
 <main>
   <div class="selecteur" id="selecteur">
-    <button data-vue="general" class="actif">Classement général</button>
+    <button data-vue="general" class="actif">Classement général (camp)</button>
+    <button data-vue="final">Classement final (1/3 année + 2/3 camp)</button>
+    <button data-vue="troupes">Classement troupes</button>
     <button data-vue="pa" data-pa="Boute-en-train">Boute-en-train</button>
     <button data-vue="pa" data-pa="Cuisinier">Cuisinier</button>
     <button data-vue="pa" data-pa="Explorateur">Explorateur</button>
@@ -232,7 +234,11 @@ document.getElementById('selecteur').addEventListener('click', (e) => {
   if (!btn) return;
   document.querySelectorAll('#selecteur button').forEach(b => b.classList.remove('actif'));
   btn.classList.add('actif');
-  vueActuelle = btn.dataset.vue === 'pa' ? { type: 'pa', pa: btn.dataset.pa } : { type: 'general', pa: null };
+  const v = btn.dataset.vue;
+  if (v === 'pa') vueActuelle = { type: 'pa', pa: btn.dataset.pa };
+  else if (v === 'final') vueActuelle = { type: 'final', pa: null };
+  else if (v === 'troupes') vueActuelle = { type: 'troupes', pa: null };
+  else vueActuelle = { type: 'general', pa: null };
   charger();
 });
 
@@ -248,19 +254,23 @@ async function charger() {
     const data = await res.json();
 
     demoNotice.style.display = 'none';
-    const liste = vueActuelle.type === 'general' ? data.classement : (data.flots ? data.flots[vueActuelle.pa] : []);
+    let liste;
+    if (vueActuelle.type === 'general') liste = data.classement;
+    else if (vueActuelle.type === 'final') liste = data.classementFinal;
+    else if (vueActuelle.type === 'troupes') liste = data.classementTroupesFinal;
+    else liste = data.flots ? data.flots[vueActuelle.pa] : [];
     const maj = data.derniereMaj ? new Date(data.derniereMaj).toLocaleTimeString('fr-FR') : new Date().toLocaleTimeString('fr-FR');
     majInfo.innerHTML = '<span class="point"></span>Mis à jour ' + maj;
-    afficher(liste || [], vueActuelle.type === 'pa');
+    afficher(liste || [], vueActuelle.type === 'pa', vueActuelle.type === 'troupes');
   } catch (err) {
     demoNotice.style.display = 'block';
     majInfo.innerHTML = '<span class="point"></span>Données de démonstration';
-    afficher(vueActuelle.type === 'general' ? DEMO_CLASSEMENT : DEMO_FLOTS[vueActuelle.pa], vueActuelle.type === 'pa');
+    afficher(vueActuelle.type === 'general' ? DEMO_CLASSEMENT : DEMO_FLOTS[vueActuelle.pa], vueActuelle.type === 'pa', false);
     console.error(err);
   }
 }
 
-function afficher(liste, estFlot) {
+function afficher(liste, estFlot, estTroupe) {
   const podium = document.getElementById('podium');
   const listeEl = document.getElementById('liste');
   podium.innerHTML = '';
@@ -270,7 +280,11 @@ function afficher(liste, estFlot) {
     return;
   }
 
-  const pts = item => estFlot ? item.points : item.total;
+  const pts = item => {
+    if (estTroupe) return Math.round(item.scoreFinal * 10) / 10;
+    if (estFlot) return item.points;
+    return item.scoreFinal !== undefined ? Math.round(item.scoreFinal * 10) / 10 : item.total;
+  };
   const top3 = liste.slice(0, 3);
   const reste = liste.slice(3, 30);
 
@@ -286,11 +300,13 @@ function afficher(liste, estFlot) {
     div.className = 'podium-place ' + classes[i];
     div.style.setProperty('--camp-couleur', COULEUR_CAMP[item.camp] || 'var(--or)');
     const rangReel = item.rang || (i===1?1:i===0?2:3);
+    const ligne1 = estTroupe ? item.troupe : (item.codePat + (item.totem ? ' · ' + item.totem : ''));
+    const ligne2 = estTroupe ? (item.nbPatrouilles + ' patrouille(s)') : (item.province + ' / ' + item.ville);
     div.innerHTML = `
       <div class="podium-medaille">${MEDAILLES[rangReel-1] || ''}</div>
-      <div class="podium-code">${item.codePat}${item.totem ? ' · ' + item.totem : ''}</div>
-      <div class="podium-troupe">${item.province} / ${item.ville}</div>
-      <div class="podium-pts">${pts(item)}<small>points</small></div>
+      <div class="podium-code">${ligne1}</div>
+      <div class="podium-troupe">${ligne2}</div>
+      <div class="podium-pts">${pts(item)}<small>${estTroupe || vueActuelle.type==='final' ? 'pts /100' : 'points'}</small></div>
     `;
     podium.appendChild(div);
   });
@@ -299,11 +315,13 @@ function afficher(liste, estFlot) {
     const div = document.createElement('div');
     div.className = 'ligne-classement';
     div.style.setProperty('--camp-couleur', COULEUR_CAMP[item.camp] || 'var(--or)');
+    const ligne1 = estTroupe ? item.troupe : (item.codePat + (item.totem ? ' · ' + item.totem : ''));
+    const ligne2 = estTroupe ? (item.nbPatrouilles + ' patrouille(s)') : (item.province + ' / ' + item.ville);
     div.innerHTML = `
       <div class="ligne-rang">${item.rang}</div>
       <div class="ligne-detail">
-        <div class="ligne-code">${item.codePat}${item.totem ? ' · ' + item.totem : ''}</div>
-        <div class="ligne-troupe">${item.province} / ${item.ville}</div>
+        <div class="ligne-code">${ligne1}</div>
+        <div class="ligne-troupe">${ligne2}</div>
       </div>
       <div class="ligne-pts">${pts(item)}</div>
     `;
