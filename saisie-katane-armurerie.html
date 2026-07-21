@@ -262,8 +262,9 @@ main{ max-width:480px; margin:0 auto; padding:20px 16px 110px; }
 
 
   <div class="etape">
-    <label for="typeArmee">5 · Type d'armée achetée</label>
-    <select id="typeArmee"><option value="">— Choisir —</option><option value="archer">Archer</option><option value="chevalier">Chevalier</option><option value="tour">Tour</option></select>
+    <label for="nombreArmees">5 · Nombre d'armées achetées</label>
+    <input type="number" id="nombreArmees" min="0" step="1" placeholder="Nombre">
+    <div class="aide">Tous types confondus (archer, chevalier, tour) — même valeur, pas besoin de différencier</div>
   </div>
 </main>
 
@@ -396,13 +397,18 @@ function selectionnerViaRecherche(p){
 }
 
 
-const typeArmee = document.getElementById('typeArmee');
+const nombreArmees = document.getElementById('nombreArmees');
+let nombreArmeesValeur = null;
+nombreArmees.addEventListener('input', () => {
+  const v = nombreArmees.value;
+  nombreArmeesValeur = (v === '' || Number(v) < 0) ? null : Number(v);
+  majBouton();
+});
 
 
 function majBouton(){
-  btnSubmit.disabled = !(cleSelectionnee !== null && (typeArmee.value !== ''));
+  btnSubmit.disabled = !(cleSelectionnee !== null && nombreArmeesValeur !== null);
 }
-typeArmee.addEventListener('change', majBouton);
 
 
 const btnSubmit = document.getElementById('btn-submit');
@@ -412,7 +418,7 @@ btnSubmit.addEventListener('click', async () => {
   btnSubmit.disabled = true;
   const donnees = {
     "CléPatrouille": cleSelectionnee,
-      "TypeArmee": typeArmee.value,
+      "Nombre": String(nombreArmeesValeur),
   };
   const envoiReussi = await gjn26EnvoyerSaisie('katane_armurerie', donnees);
   confirmation.className = 'confirmation visible ' + (envoiReussi ? 'ok' : 'attente');
@@ -420,7 +426,7 @@ btnSubmit.addEventListener('click', async () => {
   setTimeout(() => {
     confirmation.classList.remove('visible');
     selPatrouille.value = ''; resetSceau(); cleSelectionnee = null;
-    typeArmee.value = '';
+    nombreArmees.value = ''; nombreArmeesValeur = null;
 
     majBouton();
   }, 2000);

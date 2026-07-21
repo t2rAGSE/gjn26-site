@@ -266,15 +266,8 @@ main{ max-width:480px; margin:0 auto; padding:20px 16px 110px; }
     <select id="pa"><option value="">— Choisir —</option><option value="Boute-en-train">Boute-en-train — bois</option><option value="Liturgiste">Liturgiste — pierre</option><option value="Sportif-secouriste">Sportif-secouriste — fer</option></select>
   </div>
   <div class="etape">
-    <label for="niveau">6 · Niveau de l'épreuve</label>
-    <select id="niveau"><option value="">— Choisir —</option><option value="1">Niveau 1 — 1 ressource / 5 pts</option><option value="3">Niveau 2 — 3 ressources / 10 pts</option><option value="5">Niveau 3 — 5 ressources / 15 pts</option></select>
-  </div>
-  <div class="etape">
-    <label>7 · Épreuve réussie</label>
-    <div class="toggle2">
-      <button type="button" data-val="1" id="reussiKatane-oui">✓ Réussie</button>
-      <button type="button" data-val="0" id="reussiKatane-non">✗ Échouée</button>
-    </div>
+    <label for="pointsKatane">6 · Points de l'épreuve</label>
+    <input type="number" id="pointsKatane" min="0" step="1" placeholder="Nombre de points">
   </div>
 </main>
 
@@ -408,19 +401,19 @@ function selectionnerViaRecherche(p){
 
 
 const pa = document.getElementById('pa');
-const niveau = document.getElementById('niveau');
-const reussiKataneOui = document.getElementById('reussiKatane-oui');
-const reussiKataneNon = document.getElementById('reussiKatane-non');
-let reussiKataneValeur = null;
-reussiKataneOui.addEventListener('click', () => { reussiKataneValeur = 1; reussiKataneOui.classList.add('actif'); reussiKataneNon.classList.remove('actif'); majBouton(); });
-reussiKataneNon.addEventListener('click', () => { reussiKataneValeur = 0; reussiKataneNon.classList.add('actif'); reussiKataneOui.classList.remove('actif'); majBouton(); });
+const pointsKatane = document.getElementById('pointsKatane');
+let pointsKataneValeur = null;
+pointsKatane.addEventListener('input', () => {
+  const v = pointsKatane.value;
+  pointsKataneValeur = (v === '' || Number(v) < 0) ? null : Number(v);
+  majBouton();
+});
 
 
 function majBouton(){
-  btnSubmit.disabled = !(cleSelectionnee !== null && (pa.value !== '' && niveau.value !== '' && reussiKataneValeur !== null));
+  btnSubmit.disabled = !(cleSelectionnee !== null && (pa.value !== '' && pointsKataneValeur !== null));
 }
 pa.addEventListener('change', majBouton);
-niveau.addEventListener('change', majBouton);
 
 
 const btnSubmit = document.getElementById('btn-submit');
@@ -431,8 +424,7 @@ btnSubmit.addEventListener('click', async () => {
   const donnees = {
     "CléPatrouille": cleSelectionnee,
       "PA": pa.value,
-      "NiveauEpreuve": niveau.value,
-      "Reussi": String(reussiKataneValeur),
+      "Points": String(pointsKataneValeur),
   };
   const envoiReussi = await gjn26EnvoyerSaisie('katane_postes', donnees);
   confirmation.className = 'confirmation visible ' + (envoiReussi ? 'ok' : 'attente');
@@ -441,8 +433,8 @@ btnSubmit.addEventListener('click', async () => {
     confirmation.classList.remove('visible');
     selPatrouille.value = ''; resetSceau(); cleSelectionnee = null;
     pa.value = '';
-niveau.value = '';
-reussiKataneValeur = null; reussiKataneOui.classList.remove('actif'); reussiKataneNon.classList.remove('actif');
+pointsKatane.value = '';
+pointsKataneValeur = null;
 
     majBouton();
   }, 2000);

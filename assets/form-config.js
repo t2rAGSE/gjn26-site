@@ -18,23 +18,22 @@ const FORM_CONFIG = {
     }
   },
 
-
   dimanche_balises: {
-    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfMeYG3JarjSB59-XBfsa5AEW5KBgsdLKEP8OxHzhEgT-Oj3w/formResponse',
+    actionUrl: 'REMPLACER_PAR_URL_formResponse',
     entryIds: {
-      CléPatrouille: 'entry.1492364769',
-      BalisesPhase1: 'entry.1490126838',
-      BalisesPhase2: 'entry.948930006',
-      PrecisionCroquis: 'entry.464912131',
+      CléPatrouille: 'REMPLACER_entry.XXXXXXX',
+      BalisesPhase1: 'REMPLACER_entry.XXXXXXX',
+      BalisesPhase2: 'REMPLACER_entry.XXXXXXX',
+      PrecisionCroquis: 'REMPLACER_entry.XXXXXXX',
     }
   },
 
   dimanche_dechiffrage: {
-    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSelrX5PcByinGZhMLpCuvCcOO_f8BIn3SxQjUw-n9dut6siMA/formResponse',
+    actionUrl: 'REMPLACER_PAR_URL_formResponse',
     entryIds: {
-      CléPatrouille: 'entry.1866128105',
-      CleTemplier: 'entry.1810365679',
-      Vigenere: 'entry.1308893246',
+      CléPatrouille: 'REMPLACER_entry.XXXXXXX',
+      CleTemplier: 'REMPLACER_entry.XXXXXXX',
+      Vigenere: 'REMPLACER_entry.XXXXXXX',
     }
   },
 
@@ -54,8 +53,7 @@ const FORM_CONFIG = {
     entryIds: {
       CléPatrouille: 'entry.1800019512',
       PA: 'entry.1404645564',
-      NiveauEpreuve: 'entry.2142271501',
-      Reussi: 'entry.268236388',
+      Points: 'entry.2142271501',
     }
   },
 
@@ -63,7 +61,7 @@ const FORM_CONFIG = {
     actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfZCik0oMARayaCXSMhE9Ff99Z8qA_9BMMEAjVl19TcoMNiOw/formResponse',
     entryIds: {
       CléPatrouille: 'entry.379389619',
-      TypeArmee: 'entry.1302340804',
+      Nombre: 'entry.1302340804',
     }
   },
 
